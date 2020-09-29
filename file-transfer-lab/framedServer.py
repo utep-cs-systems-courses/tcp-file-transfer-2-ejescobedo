@@ -6,7 +6,7 @@ import re, socket, params
 
 switchesVarDefaults = (
     (('-l', '--listenPort') ,'listenPort', 50001),
-    (('-d', '--debug'), "debug", False), # boolean (set if present)
+    (('-d', '--debug'), "debug", True), # boolean (set if present)
     (('-?', '--usage'), "usage", False), # boolean (set if present)
     )
 
@@ -38,3 +38,8 @@ while True:
         break
     payload += b"!"             # make emphatic!
     framedSend(sock, payload, debug)
+
+    output_file = input("give me output: ")
+    output = open(output_file, 'w')
+    payload = payload.decode('utf8')
+    output.write(payload)

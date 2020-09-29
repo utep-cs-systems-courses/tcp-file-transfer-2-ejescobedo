@@ -3,10 +3,13 @@
 # Echo client program
 import socket, sys, re
 
+from os.path import exists
+
 sys.path.append("../lib")       # for params
 import params
 
 from framedSock import framedSend, framedReceive
+
 
 
 switchesVarDefaults = (
@@ -37,15 +40,24 @@ socktype = socket.SOCK_STREAM
 addrPort = (serverHost, serverPort)
 
 s = socket.socket(addrFamily, socktype)
+
+if s is None:
+    print('could not open socket')
+    sys.exit(1)
+
+s.connect(addrPort)
+
 file_to_send = input("type file to send : ")
 
+def utf8len(s):
+    return len(s.encode('utf-8'))
 
 if exists(file_to_send):
     print("hello")
     file_copy = open(file_to_send, 'r') #open file
     file_data = file_copy.read()    #save contents of file
     #print(file_data)
-    if len(s.encode('utf-8')) == 0:
+    if utf8len(file_data) == 0:
         sys.exit(0)
     else:
         framedSend(s, file_data.encode(), debug)
