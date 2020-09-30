@@ -39,7 +39,17 @@ while True:
     payload += b"!"             # make emphatic!
     framedSend(sock, payload, debug)
 
-    output_file = input("give me output: ")
-    output = open(output_file, 'w')
-    payload = payload.decode('utf8')
-    output.write(payload)
+    output_file = input("Type the output file name: ")
+    
+    if exists(output_file):
+        overw = input("File already exists. Do you want to overwrite the file you entered? ")
+        if overw == 'yes':
+            output = open(output_file, 'w')
+            payload = payload.decode('utf8')
+            output.write(payload)
+        else:
+            pass
+    else:
+        output = open(output_file, 'w')
+        payload = payload.decode('utf8')
+        output.write(payload)
