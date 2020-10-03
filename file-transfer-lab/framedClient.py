@@ -49,17 +49,23 @@ s.connect(addrPort)
 
 file_to_send = input("type file to send : ")
 
-def utf8len(s):
-    return len(s.encode('utf-8'))
-
 if exists(file_to_send):
-    file_copy = open(file_to_send, 'r') #open file
+    file_copy = open(file_to_send, 'rb') #open file
     file_data = file_copy.read()    #save contents of file
-    if utf8len(file_data) == 0:
+    if len(file_data) == 0:
+        print("cannot send empty file")
         sys.exit(0)
     else:
-        framedSend(s, file_data.encode(), debug)
-        print("received:", framedReceive(s, debug))
+        file_name = input("Enter the file name to save it as in the server ")
+        framedSend(s, file_name.encode(), debug)
+        file_exists = framedReceive(s, debug)
+        file_exists = file_exists.decode()
+        if file_exists == 'True':
+            print("file already exists in server, cannot be saved, exiting...")
+            sys.exit(0)
+        else:            
+            framedSend(s, file_data, debug)
+            print("received:", framedReceive(s, debug))
 
 else:
     print("file does not exist.")

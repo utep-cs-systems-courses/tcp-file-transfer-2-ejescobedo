@@ -25,19 +25,21 @@ lsock.listen(5)
 print("listening on:", bindAddr)
 
 while True:
-    sock, addr = lsock.accept()
-
-    from framedSock import framedSend, framedReceive
-
-    while True:
     payload = framedReceive(sock, debug)
-    if debug: print("rec'd: ", payload)
+    if debug: print("rec'd: ", payload) #Getting output file name
     if not payload:
         break
-    payload += b"!"             # make emphatic!
-    framedSend(sock, payload, debug)
+    payload = payload.decode() #Making output file name into string to check if it exists
+    
 
-    output_file = input("give me output: ")
-    output = open(output_file, 'w')
-    payload = payload.decode('utf8')
-    output.write(payload)
+    if exists(payload):
+        framedSend(sock, b"True", debug) #If it exists, let user now and do not save
+    else:
+        framedSend(sock, b"False", debug) #File name doesn't exists, now get file information from client
+        payload2 = framedReceive(sock, debug)
+        if debug: print("rec'd: ", payload2)
+        if not payload2:
+            break
+        framedSend(sock, payload2, debug)
+        output = open(payload, 'wb')  #Write file information into the newly created output file
+        output.write(payload2)
