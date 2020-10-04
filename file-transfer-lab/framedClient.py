@@ -56,16 +56,28 @@ if exists(file_to_send):
         print("cannot send empty file")
         sys.exit(0)
     else:
-        file_name = input("Enter the file name to save it as in the server ")
+        file_name = input("give us file name ")
         framedSend(s, file_name.encode(), debug)
         file_exists = framedReceive(s, debug)
         file_exists = file_exists.decode()
         if file_exists == 'True':
-            print("file already exists in server, cannot be saved, exiting...")
+            print("file already exists in server")
             sys.exit(0)
         else:            
-            framedSend(s, file_data, debug)
-            print("received:", framedReceive(s, debug))
+            try:
+                framedSend(s, file_data, debug)
+            except:
+                print("------------------------------")
+                print("connection lost while sending.")
+                print("------------------------------")
+                sys.exit(0)
+            try:
+                framedReceive(s, debug)
+            except:
+                print("------------------------------")
+                print("connection lost while receiving.")
+                print("------------------------------")
+                sys.exit(0)
 
 else:
     print("file does not exist.")
