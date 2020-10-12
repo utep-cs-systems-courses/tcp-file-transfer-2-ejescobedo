@@ -25,10 +25,6 @@ lsock.bind(bindAddr)
 lsock.listen(5)
 print("listening on:", bindAddr)
 
-#sock, addr = lsock.accept()
-
-#print("connection rec'd from", addr)
-
 
 from framedSock import framedSend, framedReceive
 
@@ -39,11 +35,8 @@ while True:
     if not os.fork():
         while True:
             payload = framedReceive(sock, debug)
-            #if debug: print("rec'd: ", payload)
             if not payload:
                 break
-                    # make emphatic!
-            #framedSend(sock, payload, debug)
             payload = payload.decode()
             
 
@@ -56,10 +49,8 @@ while True:
                 except:
                     print("connection lost while recieving.")
                     sys.exit(0)
-                #if debug: print("rec'd: ", payload2)
                 if not payload2:
                     break
-                payload2 += b"!"             # make emphatic!
                 try:
                     framedSend(sock, payload2, debug)
                 except:
@@ -67,8 +58,8 @@ while True:
                     print("connection lost while sending.")
                     print("------------------------------")
                     #sys.exit(0)
-                #payload = payload.decode()
                 output = open(payload, 'wb')
                 output.write(payload2)
-                #sys.exit(0)
                 sock.close()
+                
+                #When connection from client is cut off quickly, server will print the file content
