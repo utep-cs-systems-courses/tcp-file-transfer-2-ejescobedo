@@ -1,9 +1,8 @@
 #! /usr/bin/env python3
 
-import sys, os
+import sys
 sys.path.append("../lib")       # for params
-import re, socket, params
-from os.path import exists
+import re, socket, params, os
 
 switchesVarDefaults = (
     (('-l', '--listenPort') ,'listenPort', 50001),
@@ -25,41 +24,18 @@ lsock.bind(bindAddr)
 lsock.listen(5)
 print("listening on:", bindAddr)
 
-
-from framedSock import framedSend, framedReceive
-
 while True:
-
     sock, addr = lsock.accept()
-    print("connection rec'd from", addr)
+
+    from framedSock import framedSend, framedReceive
+
     if not os.fork():
+        print("new child process handling connection from", addr)
         while True:
             payload = framedReceive(sock, debug)
+            if debug: print("rec'd: ", payload)
             if not payload:
-                break
-            payload = payload.decode()
-            
-
-            if exists(payload):
-                framedSend(sock, b"True", debug)
-            else:
-                framedSend(sock, b"False", debug)
-                try:
-                    payload2 = framedReceive(sock, debug)
-                except:
-                    print("connection lost while recieving.")
-                    sys.exit(0)
-                if not payload2:
-                    break
-                try:
-                    framedSend(sock, payload2, debug)
-                except:
-                    print("------------------------------")
-                    print("connection lost while sending.")
-                    print("------------------------------")
-                    #sys.exit(0)
-                output = open(payload, 'wb')
-                output.write(payload2)
-                sock.close()
-                
-                #When connection from client is cut off quickly, server will print the file content
+                if debug: print("child exiting")
+                sys.exit(0)
+            payload += b"!"             # make emphatic!
+            framedSend(sock, payload, debug)
