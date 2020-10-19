@@ -47,7 +47,7 @@ while True:
                 try:
                     payload2 = framedReceive(sock, debug)
                 except:
-                    print("connection lost while recieving.")
+                    print("connection lost while receiving.")
                     sys.exit(0)
                 if not payload2:
                     break
