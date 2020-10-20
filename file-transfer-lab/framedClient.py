@@ -57,15 +57,15 @@ if exists(file_to_send):
         sys.exit(0)
     else:
         file_name = input("give us file name : ") #prompt for file name to be saved on server
-        fsock.send(file_name.encode(), debug) #encode to convert to byte array
-        file_exists = fsock.receive(debug) #server will return true or false
-        file_exists = file_exists.decode()
-        if file_exists == 'True':
+        fsock.send(file_name.encode(), debug) #Read from file as byte array
+        file_exists = fsock.receive(debug) #server will return true if the file name to be saved is being transferred or if
+        file_exists = file_exists.decode()   #it already exists on the server, false otherwise
+        if file_exists == 'True':            
             print("file already exists in server")
-            sys.exit(0)
+            sys.exit(0)                     #Exit if true
         else:            
             try:
-                fsock.send(file_data, debug)
+                fsock.send(file_data, debug)  #If false, send the file data
             except:
                 print("------------------------------")
                 print("connection lost while sending.")
