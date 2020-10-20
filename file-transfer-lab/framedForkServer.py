@@ -47,31 +47,31 @@ while True:
     sock, addr = lsock.accept()
     print("connection rec'd from", addr)
     if not os.fork():
-        while True:
-            payload = framedReceive(sock, debug)    #Receive name of the file to be saved as
-            if not payload:
+        
+        payload = framedReceive(sock, debug)    #Receive name of the file to be saved as
+        if not payload:
+            break
+        payload = payload.decode()
+        if exists(payload):
+            framedSend(sock, b"True", debug)   #If file already exists, return true
+        else:
+            framedSend(sock, b"False", debug)  #False otherwise
+            try:
+                payload2 = framedReceive(sock, debug)  #If false, receive the file data
+            except:
+                print("connection lost while receiving.")
+                sys.exit(0)
+            if not payload2:
                 break
-            payload = payload.decode()
-            if exists(payload):
-                framedSend(sock, b"True", debug)   #If file already exists, return true
-            else:
-                framedSend(sock, b"False", debug)  #False otherwise
-                try:
-                    payload2 = framedReceive(sock, debug)  #If false, receive the file data
-                except:
-                    print("connection lost while receiving.")
-                    sys.exit(0)
-                if not payload2:
-                    break
-                try:
-                    framedSend(sock, payload2, debug)
-                except:
-                    print("------------------------------")
-                    print("connection lost while sending.")
-                    print("------------------------------")
-                    #sys.exit(0)
-                output = open(payload, 'wb')
-                output.write(payload2)       #Write byte array, will be converted to string
-                sock.close()
+            try:
+                framedSend(sock, payload2, debug)
+            except:
+                print("------------------------------")
+                print("connection lost while sending.")
+                print("------------------------------")
+
+            output = open(payload, 'wb')
+            output.write(payload2)       #Write byte array, will be converted to string
+        sock.close()
                 
                 #When connection from client is cut off quickly, server will print the file content

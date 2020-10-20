@@ -61,19 +61,19 @@ if s is None:
 
 s.connect(addrPort)
 
-file_to_send = input("type file to send : ")
+file_to_send = input("type the name of the file to send : ")
 
 if exists(file_to_send):
-    file_copy = open(file_to_send, 'rb') #open file
+    file_copy = open(file_to_send, 'rb') #opens file as a byte array
     file_data = file_copy.read()    #save contents of file
     if len(file_data) == 0:
         print("cannot send empty file")
         sys.exit(0)
     else:
-        file_name = input("give us file name ")
+        file_name = input("Input the file name to be saved as ")
         framedSend(s, file_name.encode(), debug)
-        file_exists = framedReceive(s, debug)
-        file_exists = file_exists.decode()
+        file_exists = framedReceive(s, debug)     #Server will return true if file already exists
+        file_exists = file_exists.decode()        #False otherwise
         if file_exists == 'True':
             print("file already exists in server")
             sys.exit(0)

@@ -1,5 +1,18 @@
 #! /usr/bin/env python3
 
+"""Lab 2 File Transfer
+   Edgar Escobedo
+   Professor David Pruitt & Eric Freudenthal
+   MW 3:00 p.m. - 4:20 p.m.
+   This lab assignment was created with the use of demos provided by the professors. 
+   The lab involves a client and a server which communicated to each other to transfer files.
+   In the first implementation the connection of multiple clients to a server was done by using 
+   forking. In the second part Threads were introduced and the notion of Locks. Locks help to 
+   avoid transferring files to the same place at the same time, which could cause errors. The
+   lab also allows the use of a proxy to communicate between the client and the server as a 
+   middle-man. The lab was done in collaboration with Zabdi Valenciana 
+
+"""
 import sys
 sys.path.append("../lib")       # for params
 import re, socket, params, os
@@ -43,7 +56,6 @@ class Server(Thread):
     def run(self):
         global dictionary, dictLock
         print("new thread handling connection from", self.addr)
-        
         payload = self.fsock.receive(debug) #receive file name to be saved
         if debug: print("rec'd: ", payload)
         if not payload:     # done
@@ -59,7 +71,7 @@ class Server(Thread):
             if currentCheck == 'running':    #Checking dictionary
                 self.fsock.send(b"True", debug)
                 dictLock.release()
-                print("the file" +payload+"is currently being transfered")
+                print("the file " +payload+" is currently being transfered")
             else:
                 dictionary[payload] = "running"    #If it is not currently being transferred then the thread can transfer it and
                 dictLock.release()                 #you write to the dictionary that you are transferring the file
@@ -71,7 +83,7 @@ class Server(Thread):
                     print("connection lost while receiving.")
                     sys.exit(0)
                 if not payload2:
-                    break
+                    sys.exit(0)
                 try:
                     self.fsock.send(payload2, debug)
                 except:
