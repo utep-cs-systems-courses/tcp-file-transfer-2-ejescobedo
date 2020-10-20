@@ -1,5 +1,19 @@
 #! /usr/bin/env python3
 
+"""Lab 2 File Transfer
+   Edgar Escobedo
+   Professor David Pruitt & Eric Freudenthal
+   MW 3:00 p.m. - 4:20 p.m.
+   This lab assignment was created with the use of demos provided by the professors. 
+   The lab involves a client and a server which communicated to each other to transfer files.
+   In the first implementation the connection of multiple clients to a server was done by using 
+   forking. In the second part Threads were introduced and the notion of Locks. Locks help to 
+   avoid transferring files to the same place at the same time, which could cause errors. The
+   lab also allows the use of a proxy to communicate between the client and the server as a 
+   middle-man. The lab was done in collaboration with Zabdi Valenciana 
+
+"""
+
 import sys, os
 sys.path.append("../lib")       # for params
 import re, socket, params
@@ -34,18 +48,16 @@ while True:
     print("connection rec'd from", addr)
     if not os.fork():
         while True:
-            payload = framedReceive(sock, debug)
+            payload = framedReceive(sock, debug)    #Receive name of the file to be saved as
             if not payload:
                 break
             payload = payload.decode()
-            
-
             if exists(payload):
-                framedSend(sock, b"True", debug)
+                framedSend(sock, b"True", debug)   #If file already exists, return true
             else:
-                framedSend(sock, b"False", debug)
+                framedSend(sock, b"False", debug)  #False otherwise
                 try:
-                    payload2 = framedReceive(sock, debug)
+                    payload2 = framedReceive(sock, debug)  #If false, receive the file data
                 except:
                     print("connection lost while receiving.")
                     sys.exit(0)
@@ -59,7 +71,7 @@ while True:
                     print("------------------------------")
                     #sys.exit(0)
                 output = open(payload, 'wb')
-                output.write(payload2)
+                output.write(payload2)       #Write byte array, will be converted to string
                 sock.close()
                 
                 #When connection from client is cut off quickly, server will print the file content

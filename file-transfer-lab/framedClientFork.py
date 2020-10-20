@@ -1,5 +1,19 @@
 #! /usr/bin/env python3
 
+"""Lab 2 File Transfer
+   Edgar Escobedo
+   Professor David Pruitt & Eric Freudenthal
+   MW 3:00 p.m. - 4:20 p.m.
+   This lab assignment was created with the use of demos provided by the professors. 
+   The lab involves a client and a server which communicated to each other to transfer files.
+   In the first implementation the connection of multiple clients to a server was done by using 
+   forking. In the second part Threads were introduced and the notion of Locks. Locks help to 
+   avoid transferring files to the same place at the same time, which could cause errors. The
+   lab also allows the use of a proxy to communicate between the client and the server as a 
+   middle-man. The lab was done in collaboration with Zabdi Valenciana 
+
+"""
+
 # Echo client program
 import socket, sys, re
 

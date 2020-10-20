@@ -43,49 +43,49 @@ class Server(Thread):
     def run(self):
         global dictionary, dictLock
         print("new thread handling connection from", self.addr)
-        while True:
-            payload = self.fsock.receive(debug) #receive file name to be saved
-            if debug: print("rec'd: ", payload)
-            if not payload:     # done
-                if debug: print(f"thread connected to {addr} done")
-                self.fsock.close() #possible error
-                return          # exit
-            payload = payload.decode()     #receive byte array of name to be saved and convert to string 
-            if exists(payload):
+        
+        payload = self.fsock.receive(debug) #receive file name to be saved
+        if debug: print("rec'd: ", payload)
+        if not payload:     # done
+            if debug: print(f"thread connected to {addr} done")
+            self.fsock.close() #possible error
+            return          # exit
+        payload = payload.decode()     #receive byte array of name to be saved and convert to string 
+        if exists(payload):
+            self.fsock.send(b"True", debug)
+        else:
+            dictLock.acquire()         #Acquire lock to check if the wanted file is not already being saved by another thread
+            currentCheck = dictionary.get(payload)
+            if currentCheck == 'running':    #Checking dictionary
                 self.fsock.send(b"True", debug)
+                dictLock.release()
+                print("the file" +payload+"is currently being transfered")
             else:
-                dictLock.acquire()         #Acquire lock to check if the wanted file is not already being saved by another thread
-                currentCheck = dictionary.get(payload)
-                if currentCheck == 'running':    #Checking dictionary
-                    self.fsock.send(b"True", debug)
-                    dictLock.release()
-                    print("the file" +payload+"is currently being transfered")
-                else:
-                    dictionary[payload] = "running"    #If it is not currently being transferred then the thread can transfer it and
-                    dictLock.release()                 #you write to the dictionary that you are transferring the file
-                    sleep(40)  
-                    self.fsock.send(b"False", debug) #Tell client that the file is not being transferred and does not exist in the 
-                    try:                             #directory
-                        payload2 = self.fsock.receive(debug)     #Receiving file data
-                    except:
-                        print("connection lost while receiving.")
-                        sys.exit(0)
-                    if not payload2:
-                        break
-                    try:
-                        self.fsock.send(payload2, debug)
-                    except:
-                        print("------------------------------")
-                        print("connection lost while sending.")
-                        print("------------------------------")
+                dictionary[payload] = "running"    #If it is not currently being transferred then the thread can transfer it and
+                dictLock.release()                 #you write to the dictionary that you are transferring the file
+                sleep(40)  
+                self.fsock.send(b"False", debug) #Tell client that the file is not being transferred and does not exist in the 
+                try:                             #directory
+                    payload2 = self.fsock.receive(debug)     #Receiving file data
+                except:
+                    print("connection lost while receiving.")
+                    sys.exit(0)
+                if not payload2:
+                    break
+                try:
+                    self.fsock.send(payload2, debug)
+                except:
+                    print("------------------------------")
+                    print("connection lost while sending.")
+                    print("------------------------------")
 
-                    output = open(payload, 'wb') #open and set to write byte array
-                    output.write(payload2) #writing to file 
-                    output.close()
+                output = open(payload, 'wb') #open and set to write byte array
+                output.write(payload2) #writing to file 
+                output.close()
 
-                    dictLock.acquire()       #After the file has been written, delete it from the dictionary
-                    del dictionary[payload]
-                    dictLock.release()
+                dictLock.acquire()       #After the file has been written, delete it from the dictionary
+                del dictionary[payload]
+                dictLock.release()
         self.fsock.close()
         
 
